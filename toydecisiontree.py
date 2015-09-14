@@ -10,10 +10,10 @@ train_labels=[r[-1] for r in raw_data]
 """
 
 Decision Tree Computation Steps
-1) Compute purity (1-entropy) for each possible split on all attributes for all available rows
+1) Compute Entropy for each possible split on all attributes for all available rows
 2) Select the split with the best information gain
 3) Add split as node to tree
-4) Goto 1
+4) Goto 1 using this new branch
 
 """
 
