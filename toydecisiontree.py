@@ -1,24 +1,39 @@
 #!/usr/bin/python2.7
 import numpy as np
+from abstractclassifier import AbstractClassifier
 
+# Test data from Toby Segaran's book
 raw_data=[['slashdot', 'USA', 'yes', 18, 'None'], ['google', 'France', 'yes', 23, 'Premium'], ['digg', 'USA', 'yes', 24, 'Basic'], ['kiwitobes', 'France', 'yes', 23, 'Basic'], ['google', 'UK', 'no', 21, 'Premium'], ['(direct)', 'New Zealand', 'no', 12, 'None'], ['(direct)', 'UK', 'no', 21, 'Basic'], ['google', 'USA', 'no', 24, 'Premium'], ['slashdot', 'France', 'yes', 19, 'None'], ['digg', 'USA', 'no', 18, 'None'], ['google', 'UK', 'no', 18, 'None'], ['kiwitobes', 'UK', 'no', 19, 'None'], ['digg', 'New Zealand', 'yes', 12, 'Basic'], ['slashdot', 'UK', 'no', 21, 'None'], ['google', 'UK', 'yes', 18, 'Basic'], ['kiwitobes', 'France', 'yes', 19, 'Basic']]
-
 train_data=[r[:-1] for r in raw_data]
 train_labels=[r[-1] for r in raw_data]
 
 
 """
-
-Decision Tree Computation Steps
-1) Compute Entropy for each possible split on all attributes for all available rows
-2) Select the split with the best information gain
-3) Add split as node to tree
-4) Goto 1 using this new branch
-
+Steps to construct decision tree
+1) Compute score (default: entropy) for each possible split on all attributes for all available rows
+2) Select the split with the highest information gain
+3) Add new node with data evaluating to true in split
+4) Add new node with data evaluating to false in split
+5) Goto 1 using true branch
+6) Goto 1 using false branch
+7) Return node
 """
 
 
 class DTNode():
+    """ 
+    DTNode : Decision tree node
+
+    Attributes
+    ----------
+
+    true_branch : DTNode or None which handles the data for which the current node evaluated to true
+    false_branch: DTNode or None which handles the data for which the current node evaluated to false
+    attr_idx : The index of the attribute used for comparison in this node
+    val : The value to compare to
+    results: None or, if this is a leaf of the decision tree the result class
+
+    """
     def __init__(self, tb_node=None, fb_node=None, attr_idx=-1, val=None, results=None):
         self.true_branch=tb_node
         self.false_branch=fb_node
@@ -29,25 +44,57 @@ class DTNode():
     def __repr__(self):
         print self.true_branch==None, self.false_branch==None, self.attr_idx, self,val, self.results
 
-class ToyDecisionTree():
+
+class ToyDecisionTree(AbstractClassifier):
     """
+    ToyDecisionTree
 
-    Input to predict must be a list of values
+    Documentation used for implementation:
+    - Book: Toby Segaran: Collective Intelligence
 
-    Note: categorial variables/attributes must be provided as text
+    Note: Categorial variables/attributes must be encoded as literals
     else they will treated as continuous i.e. their numerical order will be of importance
 
-    Documentation used:
-    - Toby Segaran: Collective Intelligence
+    
+    Attributes
+    ----------
+    
+    tree : DTNode based structure representing the decision tree
+
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    >>> Y = np.array([1, 1, 1, 2, 2, 2])
+    >>> from toydecisiontree import ToyDecisionTree
+    >>> clf = ToyDecisionTree()
+    >>> clf.fit(X, Y)
+    >>> print(clf.predict([[-0.8, -1]]))
+    ([1],[])
+
+
+
+    TODOs
+    -----
+    - Improve documentation
+    - Pruning
+    - Min split criteria
+    - Other scores which allow e.g. regression (tyically: variance)
+    - Feature importance
+    - Investigate reason for the much higher performance of sklearn decision tree
     """
 
     def __init__(self):
         self.tree=None
 
-    def fit(self, train_labels, train_data, score=None):
+    def fit(self, train_data, train_labels, score=None):
+        """ create decision tree using train_data """
+
         train_data=np.array(train_data)
         train_labels=np.array(train_labels)
-        self.tree=self.generatetree(train_labels, train_data)
+        self.tree=self.generatetree(train_data, train_labels)
 
     def predict(self, test_data):
         test_data=np.array(test_data)
@@ -81,7 +128,7 @@ class ToyDecisionTree():
         intermediate=-p*np.log2(p)
         return(np.sum(intermediate))
 
-    def split_data(self, train_labels, train_data, attr_idx, val):
+    def split_data(self, train_data, train_labels, attr_idx, val):
         """ split data by comparing attribute keyed by attribute index to value """
 
         # if attr is numerical
@@ -96,9 +143,10 @@ class ToyDecisionTree():
         tb_data=train_data[selector,:]
         fb_labels=train_labels[-selector]
         fb_data=train_data[-selector,:]
-        return(tb_labels, tb_data, fb_labels, fb_data)
+        return(tb_data, tb_labels, fb_data, fb_labels)
         
-    def generatetree(self, train_labels, train_data, score=None):
+    def generatetree(self, train_data, train_labels, score=None):
+        """ recursively generate decision tree """
         if score==None:
             score=self.entropy
 
@@ -118,7 +166,7 @@ class ToyDecisionTree():
             attrib_vals=np.unique(train_data[:,attr_idx])
 
             for val in attrib_vals:
-                (tb_labels, tb_data, fb_labels, fb_data)=self.split_data(train_labels, train_data, attr_idx, val)
+                (tb_data, tb_labels, fb_data, fb_labels)=self.split_data(train_data, train_labels, attr_idx, val)
 
                 # compute information gain
                 p=float(tb_labels.shape[0])/train_data.shape[0]
@@ -128,8 +176,8 @@ class ToyDecisionTree():
                     best_gain=gain
                     best_attr_idx=attr_idx
                     best_val=val
-                    best_tb=(tb_labels, tb_data)
-                    best_fb=(fb_labels, fb_data)
+                    best_tb=(tb_data, tb_labels)
+                    best_fb=(fb_data, fb_labels)
 
         if best_gain>0.0:
             tb_node=self.generatetree(best_tb[0], best_tb[1])
@@ -163,6 +211,6 @@ class ToyDecisionTree():
 
 if __name__=="__main__":
     x=ToyDecisionTree()
-    x.fit(train_labels, train_data)
+    x.fit(train_data, train_labels)
     print x
     print x.predict(train_data)
