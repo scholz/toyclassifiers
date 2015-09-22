@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 
 # Construct dataset
-train_features,train_labels=make_classification(n_informative=4,n_classes=4)
+train_features,train_labels=make_classification(n_informative=2, n_redundant=0, n_repeated=0,n_classes=2, n_features=2)
 test_features=train_features
 test_labels=train_labels
 
@@ -65,7 +65,23 @@ def test_decision_tree(train_features, train_labels, test_features, test_labels)
     print "matching between sklearn and my decision tree:", accuracy_score(skl,myn)
 
 
+
+def test_kmeans(train_features, test_features):
+    from sklearn.cluster import KMeans
+    from toykmeans import ToyKMeans
+
+    tkm=ToyKMeans(n_clusters=4, n_iterations=200)
+    print "toykmeans"
+    print tkm.fit(train_features)
+
+    skm=KMeans(n_clusters=4,init='random', max_iter=200, n_init=1)
+    skm.fit(train_features)
+    print "sklearn kmeans"
+    print skm.cluster_centers_
+
+
 if __name__ == "__main__":
-    test_gaussian_naive_bayes( train_features, train_labels, test_features, test_labels)
-    test_decision_tree(train_features, train_labels, test_features, test_labels)
+   # test_gaussian_naive_bayes( train_features, train_labels, test_features, test_labels)
+   # test_decision_tree(train_features, train_labels, test_features, test_labels)
+   test_kmeans(train_features, test_features)
 
