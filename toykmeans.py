@@ -9,7 +9,7 @@ class ToyKMeans(AbstractClassifier):
     Used External Documentation
     ---------------------------
     - Book: Collective Intelligence, Segaran, O'Reilly
-    - Sklearn Cython Source: https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/cluster/_k_means.pyx
+    - Sklearn KMeans Source
 
 
     """
@@ -165,7 +165,7 @@ if __name__=="__main__":
     #print km.predict(np.array([data[3]]))
 
     from sklearn.cluster import KMeans
-    skm=KMeans(n_clusters=3,init=np.array(centroids), max_iter=2, n_init=1, verbose=True)
+    skm=KMeans(n_clusters=3,init=np.array(centroids), max_iter=2, n_init=1, verbose=False)
     skm.fit(data)
     print "skm"
     print skm.cluster_centers_

@@ -71,13 +71,24 @@ def test_kmeans(train_features, test_features):
     from toykmeans import ToyKMeans
 
     tkm=ToyKMeans(n_clusters=4, n_iterations=200)
-    print "toykmeans"
+    # provide same initialization for centroids
+    centroids=tkm.random_init(train_features)
+    tkm.centroids_=centroids
+    print "toykmeans clusters"
+    t0=time()
     print tkm.fit(train_features)
+    print "fit time for ToyKMeans:", round(time()-t0, 3), "s"
 
-    skm=KMeans(n_clusters=4,init='random', max_iter=200, n_init=1)
+    skm=KMeans(n_clusters=4,init=centroids, max_iter=200, n_init=1)
+    t0=time()
     skm.fit(train_features)
-    print "sklearn kmeans"
+    print "sklearn kmeans clusters"
+    t1=time()-t0
     print skm.cluster_centers_
+    print "fit time for sklearn KMeans:", round(t1, 3), "s"
+
+    print "Close-enough numeric match between sklearn and toy kmeans:", np.allclose(tkm.centroids_.astype(float).flatten() ,skm.cluster_centers_.astype(float).flatten())
+
 
 
 if __name__ == "__main__":
