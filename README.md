@@ -1,15 +1,15 @@
-# toyclassifiers
+## toyclassifiers
 
-## Motivation
+#### Motivation
 Provide simple, unoptimized implementations of common classification algorithms
 to foster comprehensive understanding of the algorithms including
 practical (implementation) details and optimization possiblities.
 
-## Requirements
+#### Requirements
 * Python 2.7
 * Installation of scikit learn for running test script
 
-## Implementation Status
+#### Implementation Status
 * Naive Bayes
   * only supporting continuous input variables
 
