@@ -4,13 +4,26 @@ import numpy as np
 import random
 
 class ToyKMeans(AbstractClassifier):
-    """ToyKMeans
+    """Toy KMeans unsupervised clustering
 
-    Used External Documentation
+    Algorithm
+    ---------
+    1. Random intialization of centroids (cluster centers), or use provided centers
+    2. Computation of squared euclidean distance between clusters and all instances in train data
+    3. Assign each instance to closest centroid
+    4. Handle centroids which have no assigned data instances
+       a. assign those data instances which have the largest distance to the other centroids to empty centroids
+       b. set centroids coordinates to these data instances
+
+
+    Used Documentation
     ---------------------------
     - Book: Collective Intelligence, Segaran, O'Reilly
     - Sklearn KMeans Source
 
+
+    Attributes
+    ----------
 
     """
 

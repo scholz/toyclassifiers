@@ -9,11 +9,15 @@ practical (implementation) details and optimization possiblities.
 * Python 2.7
 * Installation of scikit learn for running test script
 
-## Current status of implementations
+## Implementation Status
 * Naive Bayes
-  * currently only continuous input variables are supported
+  * only supporting continuous input variables
 
 * Decision Tree
-  * uses CART algorithm for building tree
   * uses only entropy as scoring function 
+
+* K-Means
+  * uses euclidean squared distance
+  * uses random initalization or provided coordinates for centroids
+
   

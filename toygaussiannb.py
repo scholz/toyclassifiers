@@ -6,11 +6,33 @@ class ToyGaussianNB(AbstractClassifier):
     """
     Toy Gaussian Naive Bayes (GaussianNB)
     
-    Documentation used to implement naive Bayes:                                                                            
+    Algorithm
+    ---------
+    - Training
+      - Compute priors based on prevalence of classes in train_data
+      - Compute mean and variance per class per feature
+    - Classification
+      - Compute the probability of an instance belonging to a specific class by:
+        - Iterating over all features and multiplying each iteration together,
+          where each iteration is a product of:
+          - the prior for the investigated class
+          - the probability that the instance value comes from a normal distribution (gaussian)
+            created using the mean and variance derived during training for this feature
+        - To yield a valid probability (x in  {0..1}) to which class this instance belongs
+          the sum of all probability products for each must be divided by the individuals products
+        - The class with the highest probability is chosen as result for this instance
+
+     Note: In the code mulitplications are replaced by summation since we are working with
+           logarithms to avoid problems with small numbers.
+
+
+    Used Documentation
+    ------------------
     - http://www.cs.cmu.edu/~epxing/Class/10701-10s/Lecture/lecture5.pdf (using gaussian for continuous variables)
     - http://scikit-learn.org/stable/modules/naive_bayes.html
     - http://github.com/scikit-learn/scikit-learn/blob/a95203b/sklearn/naive_bayes.py (prevent std==0 by using std+=eps)
     Note: lots of optimization potential, this code is approx. 60x slower than sklearn gaussian NB
+
 
     Attributes
     ----------
@@ -43,7 +65,6 @@ class ToyGaussianNB(AbstractClassifier):
     >>> from toygaussiannb import ToyGaussianNB
     >>> clf = ToyGaussianNB()
     >>> clf.fit(X, Y)
-    GaussianNB()
     >>> print(clf.predict([[-0.8, -1]]))
     [1]
     """
@@ -64,7 +85,7 @@ class ToyGaussianNB(AbstractClassifier):
 
         classes=np.array(training_labels)
         # ----------------------------------------------- #
-        # compute posterior probabilities                 #
+        # compute prior probabilities                     #
         # ----------------------------------------------- #
         for c in classes:
             if c not in self.class_names_:
