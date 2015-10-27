@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from abstractclassifier import AbstractClassifier
+from sklearn import linear_model
+#import linear_model.SGDRegressor as SGDRegressor
+
 
 lr_raw_data=[ [2,1], [3,2], [4,3] ]
 train_data=[r[:-1] for r in lr_raw_data]
@@ -43,9 +46,15 @@ class ToyLinearRegression(AbstractClassifier):
 
     def cost(self, train_data, train_labels):
         """
-        Compute cost function J()
+        Compute cost function J(θ), i.e.
+        the mean summed quadradic error (MSE)
         """
-    
+        
+        h_theta_tl=np.dot(train_data, self.thetas).T - train_labels
+        m=train_data.shape[0]
+        J=1/(2.*m) * np.sum(  np.square(h_theta_tl) )
+        return J
+
     
     def fit(self, train_data, train_labels):
         train_data=np.array(train_data)
@@ -74,14 +83,15 @@ class ToyLinearRegression(AbstractClassifier):
         """
         m=train_data.shape[0]
         for it in range(self.gd_iterations):
+            
             tmp_thetas=self.thetas
-            # h_theta(x)
-            h_theta=np.dot(train_data, tmp_thetas)
-            #print "h_theta:", h_theta
-            #print h_theta - train_labels
+            
+            h_theta_tl=np.dot(train_data, tmp_thetas).T - train_labels
             for i in range(len(tmp_thetas)):
-                tmp_thetas[i]=self.thetas[i] - self.alpha * 1/m * np.sum( np.dot( h_theta - train_labels, train_data[:,i]) )
+                tmp_thetas[i]=self.thetas[i] - self.alpha * 1./m * np.sum( np.multiply( h_theta_tl, train_data[:,i]) )
             self.thetas=tmp_thetas
+
+            #print "iter:",it,"cost:", self.cost(train_data, train_labels)
 
 
     def fit_ne(self, train_data, train_labels):
@@ -102,9 +112,18 @@ if __name__=="__main__":
     x.fit(train_data, train_labels)
     print x.get_thetas()    
     
-    x=ToyLinearRegression(method='gd', gd_iterations=50, alpha=0.02)
+    x=ToyLinearRegression(method='gd', gd_iterations=1500, alpha=0.01)
     x.fit(train_data, train_labels)
     print x.get_thetas()    
+    
+    SGD=linear_model.SGDRegressor(eta0=0.01, penalty='none', learning_rate='constant', loss='squared_loss', shuffle=False, n_iter=1500 )
+    SGD.fit(train_data, train_labels)
+    print "coef:",SGD.coef_
+    print "intercept", SGD.intercept_
+    print SGD.score(train_data, train_labels)
+
+
+
     #print x
     #print x.predict(train_data)
 
